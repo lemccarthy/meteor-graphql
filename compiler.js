@@ -2,26 +2,30 @@
 import loader from 'graphql-tag/loader';
 
 export default class GraphQLCompiler {
-  processFilesForTarget(files) {
-    // Fake webpack context
-    // See https://github.com/apollographql/graphql-tag/blob/master/loader.js#L26
-    const context = {
-      cacheable() {},
-    };
+	processFilesForTarget(files) {
+		// Fake webpack context
+		// See https://github.com/apollographql/graphql-tag/blob/master/loader.js#L26
+		const context = {
+			cacheable() {},
+		};
 
-    files.forEach(function (file) {
-      const path = `${file.getPathInPackage()}.js`;
-      const content = file.getContentsAsString().trim();
-      let data = '';
+		files.forEach(function (file) {
+			if (file.getPathInPackage().includes("/node_modules")) {
+				console.log("stay out of node!");
+			} else {
+				const path = `${file.getPathInPackage()}.js`;
+				const content = file.getContentsAsString().trim();
+				let data = '';
 
-      if (content) {
-        data = loader.call(context, content);
-      }
+				if (content) {
+					data = loader.call(context, content);
+				}
 
-      file.addJavaScript({
-        data,
-        path,
-      });
-    });
-  }
+				file.addJavaScript({
+					data,
+					path,
+				});
+			}
+		});
+	}
 }
